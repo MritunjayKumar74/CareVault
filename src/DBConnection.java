@@ -3,16 +3,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-    private static final String URL      = "jdbc:mysql://localhost:3306/medical_db";
-    private static final String USER     = "root";
-    private static final String PASSWORD = "Ajay12@#";
+    private static final String URL =
+            "jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require";
+    private static final String USER = "postgres.anvbyrixoyjxcjyaqdak";
+    private static final String PASSWORD = "DctorWhoPeter12@#";
 
     public static Connection getConnection() throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("MySQL JDBC Driver not found. Add mysql-connector-j.jar to classpath.");
-        }
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }
