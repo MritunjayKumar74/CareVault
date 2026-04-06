@@ -468,7 +468,7 @@ public class LoginScreen extends JFrame {
         // since your DB stores password_hash as plain or hashed text.
         String sql = """
             SELECT user_id, role, email
-            FROM   user
+            FROM   app_user
             WHERE  email = ?
               AND  password_hash = ?
               AND  status = 'ACTIVE'
