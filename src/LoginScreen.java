@@ -469,16 +469,27 @@ public class LoginScreen extends JFrame {
         String sql = """
             SELECT user_id, role, email
             FROM   app_user
-            WHERE  email = ?
-              AND  password_hash = ?
-              AND  status = 'ACTIVE'
+            WHERE  email = ? AND password_hash = ? AND status = 'ACTIVE'
         """;
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             ps.setString(2, password);   // replace with hash comparison if needed
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
+                int userId = rs.getInt("user_id");
+
+                try (PreparedStatement audit = conn.prepareStatement("""
+                    INSERT INTO audit_log(user_id, action_type, entity_type, entity_id, timestamp)
+                    VALUES (?, 'LOGIN', 'USER', ?, NOW())
+                """)) {
+                    audit.setInt(1, userId);
+                    audit.setInt(2, userId);
+                    audit.executeUpdate();
+                } catch (SQLException auditEx) {
+                    System.out.println("Audit log failed: " + auditEx.getMessage());
+                }
                 return new String[]{
                         String.valueOf(rs.getInt("user_id")),
                         rs.getString("role"),
