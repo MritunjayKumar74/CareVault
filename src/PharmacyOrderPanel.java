@@ -542,6 +542,7 @@ public class PharmacyOrderPanel extends JPanel {
                 FROM   prescription p
                 JOIN   prescription_rules pr ON p.prescription_id = pr.prescription_id
                 WHERE  p.prescription_id = ? AND p.patient_id = ?
+                FOR UPDATE
             """)) {
                 ps.setInt(1, prescriptionId); ps.setInt(2, patientId);
                 ResultSet rs = ps.executeQuery();
@@ -594,7 +595,12 @@ public class PharmacyOrderPanel extends JPanel {
 
             try (PreparedStatement ps = conn.prepareStatement(
                     "UPDATE prescription_rules SET refills_used = refills_used + 1 WHERE prescription_id = ?")) {
-                ps.setInt(1, prescriptionId); ps.executeUpdate();
+                ps.setInt(1, prescriptionId);
+                int rows = ps.executeUpdate();
+
+                if (rows == 0){
+                    throw new Exception("Rate Limit Exceeded!");
+                }
             }
             log("  Refill counter incremented ✓");
             conn.commit();
